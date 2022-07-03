@@ -21,9 +21,15 @@ type CustomerHandlers struct {
 
 func (ch *CustomerHandlers) indexCustomer(w http.ResponseWriter, r *http.Request) {
 
-	customers, _ := ch.service.GetAllCustomer()
+	status := r.URL.Query().Get("status")
 
-	writeResponse(w, r.Header.Get("Content-Type"), http.StatusOK, customers)
+	customers, err := ch.service.GetAllCustomer(status)
+
+	if err != nil {
+		writeResponse(w, r.Header.Get("Content-Type"), err.Code, err.AsMessage())
+	} else {
+		writeResponse(w, r.Header.Get("Content-Type"), http.StatusOK, customers)
+	}
 
 }
 
@@ -47,13 +53,14 @@ func writeResponse(w http.ResponseWriter, header string, code int, data interfac
 
 	w.WriteHeader(code)
 
-	if header == "application/json" {
-		if err := json.NewEncoder(w).Encode(data); err != nil {
-			panic(err)
-		}
-	} else {
+	if header == "application/xml" {
 		if err := xml.NewEncoder(w).Encode(data); err != nil {
 			panic(err)
 		}
+	} else {
+		if err := json.NewEncoder(w).Encode(data); err != nil {
+			panic(err)
+		}
+
 	}
 }
