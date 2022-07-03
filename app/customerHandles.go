@@ -3,7 +3,6 @@ package app
 import (
 	"encoding/json"
 	"encoding/xml"
-	"fmt"
 	"net/http"
 
 	"github.com/eggysetiawan/banking-go/service"
@@ -24,13 +23,7 @@ func (ch *CustomerHandlers) indexCustomer(w http.ResponseWriter, r *http.Request
 
 	customers, _ := ch.service.GetAllCustomer()
 
-	if r.Header.Get("Content-Type") == "application/xml" {
-		w.Header().Add("Content-Type", "application/xml")
-		xml.NewEncoder(w).Encode(customers)
-	} else {
-		w.Header().Add("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(customers)
-	}
+	writeResponse(w, r.Header.Get("Content-Type"), http.StatusOK, customers)
 
 }
 
@@ -40,12 +33,27 @@ func (ch *CustomerHandlers) showCustomer(w http.ResponseWriter, r *http.Request)
 	id := vars["customer"]
 
 	customer, err := ch.service.GetCustomer(id)
+
 	if err != nil {
-		w.WriteHeader(err.Code)
-		fmt.Fprintf(w, err.Message)
+		writeResponse(w, r.Header.Get("Content-Type"), err.Code, err.AsMessage())
 	} else {
-		w.Header().Add("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(customer)
+		writeResponse(w, r.Header.Get("Content-Type"), http.StatusOK, customer)
 	}
 
+}
+
+func writeResponse(w http.ResponseWriter, header string, code int, data interface{}) {
+	w.Header().Add("Content-Type", header)
+
+	w.WriteHeader(code)
+
+	if header == "application/json" {
+		if err := json.NewEncoder(w).Encode(data); err != nil {
+			panic(err)
+		}
+	} else {
+		if err := xml.NewEncoder(w).Encode(data); err != nil {
+			panic(err)
+		}
+	}
 }
