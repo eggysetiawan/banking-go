@@ -14,10 +14,12 @@ func Start() {
 	router := mux.NewRouter()
 
 	// wiring
-	ch := CustomerHandlers{service.NewCustomerService(domain.NewCustomerRepositoryStub())}
+	// ch := CustomerHandlers{service.NewCustomerService(domain.NewCustomerRepositoryStub())}
+	ch := CustomerHandlers{service.NewCustomerService(domain.NewCustomerRepositoryDb())}
 
 	// defines route
 	router.HandleFunc("/customers", ch.indexCustomer).Methods(http.MethodGet)
+	router.HandleFunc("/customers/{customer:[0-9]+}", ch.showCustomer).Methods(http.MethodGet)
 
 	// starting server
 	log.Fatal(http.ListenAndServe("localhost:8000", router))
