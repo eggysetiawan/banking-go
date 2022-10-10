@@ -19,6 +19,16 @@ type CustomerHandlers struct {
 	service service.CustomerService
 }
 
+func (ch *CustomerHandlers) IndexCustomerActive(w http.ResponseWriter, r *http.Request) {
+	customers, err := ch.service.GetAllCustomerActive()
+	if err != nil {
+		writeResponse(w, r.Header.Get("Content-Type"), err.Code, err.AsMessage())
+	} else {
+		writeResponse(w, r.Header.Get("Content-Type"), http.StatusOK, customers)
+	}
+
+}
+
 func (ch *CustomerHandlers) indexCustomer(w http.ResponseWriter, r *http.Request) {
 
 	status := r.URL.Query().Get("status")
@@ -31,6 +41,16 @@ func (ch *CustomerHandlers) indexCustomer(w http.ResponseWriter, r *http.Request
 		writeResponse(w, r.Header.Get("Content-Type"), http.StatusOK, customers)
 	}
 
+}
+
+func (ch *CustomerHandlers) indexCustomerInactive(w http.ResponseWriter, r *http.Request) {
+	customers, err := ch.service.GetAllCustomerInactive()
+
+	if err != nil {
+		writeResponse(w, r.Header.Get("Content-Type"), err.Code, err.AsMessage())
+	} else {
+		writeResponse(w, r.Header.Get("Content-Type"), http.StatusOK, customers)
+	}
 }
 
 func (ch *CustomerHandlers) showCustomer(w http.ResponseWriter, r *http.Request) {

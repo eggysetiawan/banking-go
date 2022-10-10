@@ -7,6 +7,8 @@ import (
 
 type CustomerService interface {
 	GetAllCustomer(status string) ([]domain.Customer, *errs.AppError)
+	GetAllCustomerInactive() ([]domain.Customer, *errs.AppError)
+	GetAllCustomerActive() ([]domain.Customer, *errs.AppError)
 	GetCustomer(id string) (*domain.Customer, *errs.AppError)
 }
 
@@ -25,6 +27,15 @@ func (s DefaultCustomerService) GetAllCustomer(status string) ([]domain.Customer
 	}
 
 	return s.repo.FindAll(status)
+}
+
+func (s DefaultCustomerService) GetAllCustomerActive() ([]domain.Customer, *errs.AppError) {
+	return s.repo.FindAllActive()
+}
+
+func (s DefaultCustomerService) GetAllCustomerInactive() ([]domain.Customer, *errs.AppError) {
+	return s.repo.FindAllInactive()
+
 }
 
 func (s DefaultCustomerService) GetCustomer(id string) (*domain.Customer, *errs.AppError) {
